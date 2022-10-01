@@ -2,7 +2,7 @@ from Tools.ShapleyValue import *
 
 print("Testing if the Shapley value is just a multiple of its modified version, which only satisfies Dummy, Symmetry and Linearity")
 
-# Each value is assigned to one player to create a game
+# Each value is assigned to one player to create a gamem, each value has to be nonnegative
 values = [1,2,0,3,4,0,0,2,2,0]
 # The setting here makes that a player is dummy iff it is with value 0
 game = easyGame(values, lambda x:x**(1/3))
