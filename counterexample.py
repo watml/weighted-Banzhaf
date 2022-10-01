@@ -17,7 +17,7 @@ vm = vm * v[0]/vm[0]
 msg = """
 Result from Shapley value method is
 {}
-Scaling the values generated from the modified version on the 1st component yields
+Scaling the values generated from the modified version so that they match on the 1st component yields
 {}
 """
 print(msg.format(v,vm))
