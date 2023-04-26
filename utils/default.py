@@ -11,13 +11,13 @@ class args_parser:
                     value = "weighted_banzhaf",
                     param = 0.5,
                     method = "maximum_sample_reuse",
-                    num_eval_per_player=4000,
-                    track_interval_per_player=250,
+                    num_eval_per_player=1000,
+                    track_interval_per_player=100,
                     estimator_seed=2023
                 ),
                 game = dict(
                     dataset = "cpu",
-                    metric = "accuracy",
+                    metric = "KL",
                     game_seed = 2023,
                     model_type = "auto",
                     lr = "auto",
@@ -28,53 +28,55 @@ class args_parser:
                     n_val = 200,
                     n_test = 1,
                     dataset_seed = 2023,
-                    flip_percent = None,
+                    flip_percent = 0.2,
                     flip_seed = 2023
                 )
             )
         )
-        self.args_auto = {
-            "covertype" : dict(
-                model_type = "logistic",
-                lr = 0.14,
-                r = 0.03
-            ),
-            "cpu" : dict(
-                model_type = "logistic",
-                lr = 0.67,
-                r = 0.0
-            ),
-            "2dplanes" : dict(
-                model_type = "logistic",
-                lr = 0.46,
-                r = 0.0
-            ),
-            "pol" : dict(
-                model_type = "logistic",
-                lr = 0.39,
-                r = 0.0
-            ),
-            "wind" : dict(
-                model_type = "logistic",
-                lr = 1.0,
-                r = 0.0
-            ),
-            "phoneme" : dict(
-                model_type = "logistic",
-                lr = 0.62,
-                r = 0.018
-            ),
-            "vehicle" : dict(
-                model_type = "logistic",
-                lr = 0.11,
-                r = 0.0
-            ),
-            "fraud": dict(
-                model_type="logistic",
-                lr=2.2,
-                r=0.001
-            )
-        }
+        self.args_auto = DotMap(
+                {
+                "covertype" : dict(
+                    model_type = "logistic",
+                    lr = 0.14,
+                    r = 0.03
+                ),
+                "cpu" : dict(
+                    model_type = "logistic",
+                    lr = 0.67,
+                    r = 0.0
+                ),
+                "2dplanes" : dict(
+                    model_type = "logistic",
+                    lr = 0.46,
+                    r = 0.0
+                ),
+                "pol" : dict(
+                    model_type = "logistic",
+                    lr = 0.39,
+                    r = 0.0
+                ),
+                "wind" : dict(
+                    model_type = "logistic",
+                    lr = 1.0,
+                    r = 0.0
+                ),
+                "phoneme" : dict(
+                    model_type = "logistic",
+                    lr = 0.62,
+                    r = 0.018
+                ),
+                "vehicle" : dict(
+                    model_type = "logistic",
+                    lr = 0.11,
+                    r = 0.0
+                ),
+                "fraud": dict(
+                    model_type="logistic",
+                    lr=2.2,
+                    r=0.001
+                )
+            }
+        )
 
 
     def product_args_list(self, *, path_variable, args_list):

@@ -4,6 +4,8 @@ import fcntl
 from tqdm import tqdm
 import platform
 from datetime import  datetime
+import multiprocessing
+
 
 ## this lock tends to loose when using multiprocessing.Pool after locking
 class fcntl_lock:
@@ -69,7 +71,7 @@ class test_lock:
 
 class vd_tqdm(tqdm):
     def __init__(self, *args, file_to_write, write_mode="a+", **kwargs):
-        super(vd_tqdm, self).__init__(*args, **kwargs)
+        tqdm.__init__(self, *args, **kwargs)
         self.write_mode = write_mode
         self.file_to_write = file_to_write
 
@@ -94,17 +96,28 @@ class vd_tqdm(tqdm):
         return displayed
 
 
+def vd_Pool(n=None):
+    import os
+    # below is the complete list of environmental variables and the package
+    # that uses that variable to control the number of threads it spawns.
+    os.environ["OMP_NUM_THREADS"] = "1"  # openmp, export OMP_NUM_THREADS=1
+    os.environ["OPENBLAS_NUM_THREADS"] = "1"  # openblas, export OPENBLAS_NUM_THREADS=1
+    os.environ["MKL_NUM_THREADS"] = "1"  # mkl, export MKL_NUM_THREADS=1
+    os.environ["VECLIB_MAXIMUM_THREADS"] = "1"  # accelerate, export VECLIB_MAXIMUM_THREADS=1
+    os.environ["NUMEXPR_NUM_THREADS"] = "1"  # numexpr, export NUMEXPR_NUM_THREADS=1
+    return multiprocessing.Pool(n)
 
 
+class path_parser:
+    def __init__(self, path):
+        path_split = path.split(";")
+        self.dict_var = dict()
+        for pair in path_split:
+            pair_split = pair.split("=")
+            self.dict_var.update({pair_split[0] : pair_split[1]})
+
+    def __call__(self, key):
+        return self.dict_var[key]
 
 
-
-
-def dict_product(d):
-    keys = d.keys()
-    vals = d.values()
-    args_all = []
-    for instance in itertools.product(*vals):
-        args_all.append(dict(zip(keys, instance)))
-    return args_all
 

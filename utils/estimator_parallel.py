@@ -17,120 +17,17 @@ tqdm_display_step = 100
 
 
 class value_estimator_parallel():
-    def __init__(self, *, args_game, args_dataset, use_gpu, n_process, prog_file):
+    def __init__(self, *, args_game, args_dataset, use_gpu, n_process, prog_file, probability_target):
         self.args_game = args_game
         self.args_dataset = args_dataset
         self.use_gpu = use_gpu
         self.n_process = n_process
         self.prog_file = prog_file
-
-    def estimate_parallel(self, request, args_dict):
-        game = game_for_parallel(**self.args_game, **self.args_dataset)
-        method = args_dict["method"]
-        num_player = self.args_dataset.n_valued
-
-        id = request[0]
-        if id == self.n_process-2 or (self.n_process == 1 and id == 0):
-            display_tqdm = True
-        else:
-            display_tqdm = False
-
-        jobs = request[1]
-        num_job = len(jobs)
-        miniters = num_job // tqdm_display_step
-
-        value_chip = np.zeros(num_player)
-        if method == "exact":
-            right_index = np.zeros(num_player, dtype=bool)
-            left_index = np.ones_like(right_index)
-            weight_all = args_dict["weight_all"]
-            for job in vd_tqdm(jobs, file_to_write=self.prog_file,  miniters=miniters, maxinterval=float('inf'),
-                               disable=not display_tqdm):
-                weight = weight_all[np.sum(job)]
-                right_index[:num_player - 1] = job
-                left_index[:num_player - 1] = job
-                value_chip[-1] += weight * (game.evaluate(left_index) - game.evaluate(right_index))
-                for player in range(num_player - 1):
-                    right_index[-1], right_index[player] = right_index[player], right_index[-1]
-                    left_index[-1], left_index[player] = left_index[player], left_index[-1]
-                    value_chip[player] += weight * (game.evaluate(left_index) - game.evaluate(right_index))
-                    right_index[-1], right_index[player] = right_index[player], right_index[-1]
-                    left_index[-1], left_index[player] = left_index[player], left_index[-1]
-        elif method == "permutation":
-            subset_index = np.zeros(num_player, dtype=bool)
-            empty_value = game.evaluate(subset_index)
-            for job in vd_tqdm(jobs, file_to_write=self.prog_file,  miniters=miniters, maxinterval=float('inf'),
-                               disable=not display_tqdm):
-                pre_value = empty_value
-                for i in range(num_player):
-                    player = job[i]
-                    value_chip[player] -= pre_value
-                    subset_index[player] = 1
-                    cur_value = game.evaluate(subset_index)
-                    value_chip[player] += cur_value
-                    pre_value = cur_value
-                subset_index.fill(0)
-
-        elif method == "sampling_lift":
-            subset_index = np.zeros(num_player, dtype=bool)
-            for job in vd_tqdm(jobs, file_to_write=self.prog_file,  miniters=miniters, maxinterval=float('inf'),
-                               disable=not display_tqdm):
-                subset_index[job] = 1
-                value_chip[-1] -= game.evaluate(subset_index)
-                subset_index[-1] = 1
-                value_chip[-1] += game.evaluate(subset_index)
-                for player in range(num_player - 1):
-                    subset_index[-1], subset_index[player] = subset_index[player], subset_index[-1]
-                    value_chip[player] += game.evaluate(subset_index)
-                    subset_index[player] = 0
-                    value_chip[player] -= game.evaluate(subset_index)
-                    subset_index[player] = 1
-                    subset_index[-1], subset_index[player] = subset_index[player], subset_index[-1]
-                subset_index.fill(0)
-
-        elif method == "reweighted_sampling_lift":
-            subset_index = np.zeros(num_player, dtype=bool)
-            weight_all = args_dict["weight_all"]
-            for job in vd_tqdm(jobs, file_to_write=self.prog_file,  miniters=miniters, maxinterval=float('inf'),
-                               disable=not display_tqdm):
-                weight = weight_all[len(job)]
-                subset_index[job] = 1
-                value_right = game.evaluate(subset_index)
-                subset_index[-1] = 1
-                value_left = game.evaluate(subset_index)
-                value_chip[-1] += weight * (value_left - value_right)
-                for player in range(num_player - 1):
-                    subset_index[-1], subset_index[player] = subset_index[player], subset_index[-1]
-                    value_left = game.evaluate(subset_index)
-                    subset_index[player] = 0
-                    value_right = game.evaluate(subset_index)
-                    value_chip[player] += weight * (value_left - value_right)
-                    subset_index[player] = 1
-                    subset_index[-1], subset_index[player] = subset_index[player], subset_index[-1]
-                subset_index.fill(0)
-        elif method == "maximum_sample_reuse":
-            count_left = np.zeros(num_player)
-            count_right = np.zeros(num_player)
-            sum_left = np.zeros(num_player)
-            sum_right = np.zeros(num_player)
-            for job in vd_tqdm(jobs, file_to_write=self.prog_file,  miniters=miniters, maxinterval=float('inf'),
-                               disable=not display_tqdm):
-                value_subset = game.evaluate(job)
-                index_left = job == 1
-                count_left[index_left] += 1
-                count_right[~index_left] += 1
-                sum_left[index_left] += value_subset
-                sum_right[~index_left] -= value_subset
-            return (count_left, count_right, sum_left, sum_right)
-
-        else:
-            raise NotImplementedError
-
-        return value_chip
+        self.probability_target = probability_target
 
 
-
-    def run(self, *, value="shapley", param=None, method="exact", num_eval_per_player=4000, estimator_seed=2023, track_interval_per_player=250):
+    def run(self, *, value="shapley", param=None, method="exact", num_eval_per_player=4000, estimator_seed=2023,
+            track_interval_per_player=250):
         """
         track_interval=50 means the approximate value will be tracked at 50,100,150,200,..., sample points.
 
@@ -301,6 +198,110 @@ class value_estimator_parallel():
             return traj
         else:
             return calculated_value
+
+    def estimate_parallel(self, request, args_dict):
+        game = game_for_parallel(**self.args_game, **self.args_dataset, probability_target=self.probability_target)
+        method = args_dict["method"]
+        num_player = self.args_dataset.n_valued
+
+        id = request[0]
+        if id == self.n_process-2 or (self.n_process == 1 and id == 0):
+            display_tqdm = True
+        else:
+            display_tqdm = False
+
+        jobs = request[1]
+        num_job = len(jobs)
+        miniters = num_job // tqdm_display_step
+
+        value_chip = np.zeros(num_player)
+        if method == "exact":
+            right_index = np.zeros(num_player, dtype=bool)
+            left_index = np.ones_like(right_index)
+            weight_all = args_dict["weight_all"]
+            for job in vd_tqdm(jobs, file_to_write=self.prog_file,  miniters=miniters, maxinterval=float('inf'),
+                               disable=not display_tqdm):
+                weight = weight_all[np.sum(job)]
+                right_index[:num_player - 1] = job
+                left_index[:num_player - 1] = job
+                value_chip[-1] += weight * (game.evaluate(left_index) - game.evaluate(right_index))
+                for player in range(num_player - 1):
+                    right_index[-1], right_index[player] = right_index[player], right_index[-1]
+                    left_index[-1], left_index[player] = left_index[player], left_index[-1]
+                    value_chip[player] += weight * (game.evaluate(left_index) - game.evaluate(right_index))
+                    right_index[-1], right_index[player] = right_index[player], right_index[-1]
+                    left_index[-1], left_index[player] = left_index[player], left_index[-1]
+        elif method == "permutation":
+            subset_index = np.zeros(num_player, dtype=bool)
+            empty_value = game.evaluate(subset_index)
+            for job in vd_tqdm(jobs, file_to_write=self.prog_file,  miniters=miniters, maxinterval=float('inf'),
+                               disable=not display_tqdm):
+                pre_value = empty_value
+                for i in range(num_player):
+                    player = job[i]
+                    value_chip[player] -= pre_value
+                    subset_index[player] = 1
+                    cur_value = game.evaluate(subset_index)
+                    value_chip[player] += cur_value
+                    pre_value = cur_value
+                subset_index.fill(0)
+
+        elif method == "sampling_lift":
+            subset_index = np.zeros(num_player, dtype=bool)
+            for job in vd_tqdm(jobs, file_to_write=self.prog_file,  miniters=miniters, maxinterval=float('inf'),
+                               disable=not display_tqdm):
+                subset_index[job] = 1
+                value_chip[-1] -= game.evaluate(subset_index)
+                subset_index[-1] = 1
+                value_chip[-1] += game.evaluate(subset_index)
+                for player in range(num_player - 1):
+                    subset_index[-1], subset_index[player] = subset_index[player], subset_index[-1]
+                    value_chip[player] += game.evaluate(subset_index)
+                    subset_index[player] = 0
+                    value_chip[player] -= game.evaluate(subset_index)
+                    subset_index[player] = 1
+                    subset_index[-1], subset_index[player] = subset_index[player], subset_index[-1]
+                subset_index.fill(0)
+
+        elif method == "reweighted_sampling_lift":
+            subset_index = np.zeros(num_player, dtype=bool)
+            weight_all = args_dict["weight_all"]
+            for job in vd_tqdm(jobs, file_to_write=self.prog_file,  miniters=miniters, maxinterval=float('inf'),
+                               disable=not display_tqdm):
+                weight = weight_all[len(job)]
+                subset_index[job] = 1
+                value_right = game.evaluate(subset_index)
+                subset_index[-1] = 1
+                value_left = game.evaluate(subset_index)
+                value_chip[-1] += weight * (value_left - value_right)
+                for player in range(num_player - 1):
+                    subset_index[-1], subset_index[player] = subset_index[player], subset_index[-1]
+                    value_left = game.evaluate(subset_index)
+                    subset_index[player] = 0
+                    value_right = game.evaluate(subset_index)
+                    value_chip[player] += weight * (value_left - value_right)
+                    subset_index[player] = 1
+                    subset_index[-1], subset_index[player] = subset_index[player], subset_index[-1]
+                subset_index.fill(0)
+        elif method == "maximum_sample_reuse":
+            count_left = np.zeros(num_player)
+            count_right = np.zeros(num_player)
+            sum_left = np.zeros(num_player)
+            sum_right = np.zeros(num_player)
+            for job in vd_tqdm(jobs, file_to_write=self.prog_file,  miniters=miniters, maxinterval=float('inf'),
+                               disable=not display_tqdm):
+                value_subset = game.evaluate(job)
+                index_left = job == 1
+                count_left[index_left] += 1
+                count_right[~index_left] += 1
+                sum_left[index_left] += value_subset
+                sum_right[~index_left] -= value_subset
+            return (count_left, count_right, sum_left, sum_right)
+
+        else:
+            raise NotImplementedError
+
+        return value_chip
 
     @staticmethod
     def divide_chunks(l, n):

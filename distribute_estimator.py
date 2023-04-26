@@ -21,8 +21,10 @@ import platform
 import multiprocessing as mp
 from utils import universe
 ########################################################
+debug = 0
+# debug = 1 will save all results into root/test
 use_gpu = 0
-exp_name = "weighted"
+exp_name = "recent"
 err_file = "err"
 out_file = "out"
 prog_file = "prog"
@@ -31,70 +33,113 @@ args_list = [
         estimator = dict(
             value="weighted_banzhaf",
             param=np.round(np.arange(0.05, 1.0, 0.05), 2),
-            #param=None,
-            #param=[(16,1),(4,1),(1,4),(1,16),(2,2)],
             method="maximum_sample_reuse",
-            num_eval_per_player=4000
         ),
         game = dict(
             dataset=["covertype","wind","cpu","2dplanes","pol","phoneme","fraud"],
             metric=["accuracy"],
-            game_seed=np.arange(20)
+            game_seed=np.arange(10)
         ),
         dataset = dict(
             n_valued=200,
-            n_val=200
+            n_val=200,
+            flip_percent=0.2
         )
     ),
     dict(
         estimator = dict(
             value="beta_shapley",
-            #param=np.round(np.arange(0.05, 1.0, 0.05), 2),
-            #param=None,
             param=[(16,1),(4,1),(1,4),(1,16),(2,2)],
             method="reweighted_sampling_lift",
-            num_eval_per_player=4000
         ),
         game = dict(
             dataset=["covertype","wind","cpu","2dplanes","pol","phoneme","fraud"],
             metric=["accuracy"],
-            game_seed=np.arange(20)
+            game_seed=np.arange(10)
         ),
         dataset = dict(
             n_valued=200,
-            n_val=200
+            n_val=200,
+            flip_percent=0.2
         )
     ),
     dict(
         estimator = dict(
             value="shapley",
-            #param=np.round(np.arange(0.05, 1.0, 0.05), 2),
             param=None,
-            #param=[(16,1),(4,1),(1,4),(1,16),(2,2)],
             method="permutation",
-            num_eval_per_player=4000
         ),
         game = dict(
             dataset=["covertype","wind","cpu","2dplanes","pol","phoneme","fraud"],
             metric=["accuracy"],
-            game_seed=np.arange(20)
+            game_seed=np.arange(10)
         ),
         dataset = dict(
             n_valued=200,
-            n_val=200
+            n_val=200,
+            flip_percent=0.2
+        )
+    ),
+
+    dict(
+        estimator = dict(
+            value="weighted_banzhaf",
+            param=np.round(np.arange(0.05, 1.0, 0.05), 2),
+            method="maximum_sample_reuse",
+        ),
+        game = dict(
+            dataset=["covertype","wind","cpu","2dplanes","pol","phoneme"],
+            metric=["accuracy"],
+            game_seed=np.arange(10)
+        ),
+        dataset = dict(
+            n_valued=200,
+            n_val=200,
+            flip_percent=None
+        )
+    ),
+    dict(
+        estimator = dict(
+            value="beta_shapley",
+            param=[(16,1),(4,1),(1,4),(1,16),(2,2)],
+            method="reweighted_sampling_lift",
+        ),
+        game = dict(
+            dataset=["covertype","wind","cpu","2dplanes","pol","phoneme"],
+            metric=["accuracy"],
+            game_seed=np.arange(10)
+        ),
+        dataset = dict(
+            n_valued=200,
+            n_val=200,
+            flip_percent=None
+        )
+    ),
+    dict(
+        estimator = dict(
+            value="shapley",
+            param=None,
+            method="permutation",
+        ),
+        game = dict(
+            dataset=["covertype","wind","cpu","2dplanes","pol","phoneme"],
+            metric=["accuracy"],
+            game_seed=np.arange(10)
+        ),
+        dataset = dict(
+            n_valued=200,
+            n_val=200,
+            flip_percent=None
         )
     )
 ]
-n_process = 16
+n_process = 10
 
 path_variable = ["value", "param", "method", "metric", "game_seed"]
-# with n_valued=n_val=200, n_test=2000, n_process=20 will explode, n_process=15 is fine
-# with n_valued=n_val=n_test=15, set n_process=30
 root = "/home/wangy1g/wd/datavaluation/exp"
 ########################################################
-def get_acc(args_game, args_dataset):
-    game = game_from_data(**args_game, **args_dataset)
-    return game.apply_seed()
+if debug:
+    root = os.path.join(root, "test")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--n_process", type=int, default=n_process)
@@ -107,7 +152,9 @@ err_file = os.path.join(root, f"{exp_name}_{err_file}.txt")
 out_file = os.path.join(root, f"{exp_name}_{out_file}.txt")
 prog_file = os.path.join(root, f"{exp_name}_{prog_file}.txt")
 
+
 load_torch_device(use_gpu=use_gpu)
+## only variables created before multiprocessing.Pool will be seen as global, including those attached to py file.
 universe.pool = mp.Pool(n_process)
 
 parser = args_parser()
@@ -140,12 +187,12 @@ try:
         lock_writer.realse()
         del lock_writer
 
-        with mp.Pool(1) as p:
-            acc = p.starmap(get_acc, [(args_dict.game, args_dict.dataset)])[0]
+        game = game_for_parallel(**args_dict.game, **args_dict.dataset)
+        acc, probability_target = game.acc, game.probability_target
 
 
         estimator = value_estimator_parallel(args_game=args_dict.game, args_dataset=args_dict.dataset, use_gpu=use_gpu,
-                                    n_process=n_process, prog_file=prog_file)
+                                    n_process=n_process, prog_file=prog_file, probability_target=probability_target)
         values = estimator.run(**args_dict.estimator)
 
         save_file = os.path.join(save_path, "values.npz")
@@ -162,15 +209,15 @@ try:
         del lock_process
     universe.pool.terminate()
 except:
-    if "lock_process" in locals():
-        lock_process.realse()
-    if "lock_writer" in locals():
-        lock_writer.realse()
     with open(err_file, "a+") as f_stderr:
         f_stderr.write("\n")
         traceback.print_exc(file=f_stderr)
     traceback.print_exc()
     universe.pool.terminate()
+    if "lock_process" in locals():
+        lock_process.realse()
+    if "lock_writer" in locals():
+        lock_writer.realse()
 
 
 

@@ -158,7 +158,7 @@ class game_from_data():
 
         if self.display:
             print(f"the accuracy trained on full dataset is {acc} given seed {self.game_seed}")
-        return acc
+        return acc, self.target_prob
 
 
 
@@ -169,14 +169,15 @@ class game_from_data():
 # 2) it assumes game_seed is given once and for all, i.e, self.apply_seed() is removed;
 # 3) remove metric == "entropy_loss".
 class game_for_parallel():
-    def __init__(self, *, dataset, model_type="logistic", metric="accuracy", game_seed=2023,
-                 lr=0.2, r=1.0,
-                 **kwargs):
+    def __init__(self, *, dataset, model_type="logistic", metric="accuracy", game_seed=2023, lr=0.2, r=1.0,
+                 probability_target=None, **kwargs):
         self.game_seed = game_seed
         self.metric = metric
         self.criterion = torch.nn.CrossEntropyLoss()
         self.model_type = model_type
         self.r = r
+        self.probability_target = probability_target
+        self.acc = None
 
         (self.X, self.y), (self.X_val, self.y_val), _ = load_dataset(dataset, display=False, **kwargs)
         if len(self.y) == 2:
@@ -200,6 +201,19 @@ class game_for_parallel():
         self.X_train = self.X[self.perm].to(universe.device)
         self.y_train = self.y[self.perm].to(universe.device)
 
+        if self.probability_target is None:
+            self.train_model(self.X_train, self.y_train)
+            self.model.eval()
+            with torch.no_grad():
+                logits = self.model(self.X_val)
+            self.model.train()
+
+            self.probability_target = F.softmax(logits, dim=1)
+            predict = np.argmax(logits.cpu().numpy(), 1)
+            label = self.y_val.cpu().numpy()
+            self.acc = np.sum(predict == label) / len(label)
+
+
 
     def evaluate(self, subset):
         idx = subset[self.perm]==1
@@ -216,9 +230,9 @@ class game_for_parallel():
                 layer.reset_parameters()
         torch.manual_seed(int.from_bytes(os.urandom(8), byteorder="big"))
         if y.numel():
-            for input, label in zip(X, y):
+            for datum, label in zip(X, y):
                 self.optimizer.zero_grad()
-                logit = self.model(input)
+                logit = self.model(datum)
                 loss = self.criterion(logit, label)
                 if self.model_type == "logistic":
                     loss += torch.sum(torch.square(self.model.linear.weight)) * self.r / 2
@@ -237,6 +251,9 @@ class game_for_parallel():
             score = np.sum(predict==label) / len(label)
         elif self.metric == "cross_entropy":
             score = self.criterion(logits, self.y_val).cpu().numpy()
+        elif self.metric == "KL":
+            log_prob = F.log_softmax(logits, dim=1)
+            score = -F.kl_div(log_prob, self.probability_target, reduction="batchmean").cpu().numpy()
         else:
             raise NotImplementedError(f"Check {self.metric}")
         return score
