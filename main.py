@@ -15,6 +15,7 @@ from utils.estimators import *
 from utils.utilityFuncs import *
 import multiprocessing as mp
 import torch
+import numpy as np
 torch.backends.deterministic = True
 torch.backends.cudnn.benchmark = False
 
