@@ -14,6 +14,7 @@ class runEstimator:
         self.n_process = n_process
         self.estimator_args = kwargs
 
+
     def run(self):
         estimator = getattr(sys.modules[__name__], self.estimator)(value=self.value, param=self.param,
                                                                    **self.estimator_args)

@@ -24,7 +24,8 @@ root = os.path.join("exp", args_input.pop("dir"))
 n_process = args_input.pop("n_process")
 name_top = ["dataset"]
 name_sub = ["value", "param", "game_seed", "estimator"]
-#####
+
+
 def extreme_case(param):
     global game_func, game_args, args
     vs_traj = np.empty((1, args.n_valued), dtype=np.float64)
