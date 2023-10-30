@@ -3,6 +3,8 @@ import torch
 import itertools
 from dotmap import DotMap
 import os
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 class set_numpy_seed:
     def __init__(self, seed):
@@ -58,3 +60,40 @@ def args_product(args_group):
         for instance in itertools.product(*vals):
             args_all.append(DotMap(dict(zip(keys, instance))))
     return args_all
+
+def plot_curves(x, ys, fig_saved, labels=None, x_label=None, y_label=None, title=None, axis=0, plot_std=True):
+    # sns.set_theme()
+    fig, ax = plt.subplots(figsize=(32, 24))
+    plt.grid()
+    clrs = sns.color_palette(n_colors=len(ys))
+    if labels is None:
+        enum = zip(ys)
+    else:
+        enum = zip(ys, labels)
+    for i, take in enumerate(enum):
+        if len(take) == 2:
+            y, label = take
+        else:
+            y = take[0]
+            label = None
+        mean = np.mean(y, axis=axis)
+        std = np.std(y, axis=axis)
+        num_remain = len(x) - len(mean)
+        if num_remain > 0:
+            mean = np.pad(mean, (0, num_remain), constant_values=np.nan)
+            std = np.pad(std, (0, num_remain), constant_values=np.nan)
+        ax.plot(x, mean, label=label, c=clrs[i], linewidth=10)
+        if plot_std:
+            ax.fill_between(x, mean-std, mean+std, alpha=0.3, facecolor=clrs[i])
+
+    ax.tick_params(axis='x', labelsize=70)
+    ax.tick_params(axis='y', labelsize=70)
+    if x_label is not None:
+        plt.xlabel(x_label, fontsize=80)
+    if y_label is not None:
+        plt.ylabel(y_label, fontsize=80)
+    if title is not None:
+        ax.set_title(title, fontsize=80)
+    plt.legend(fontsize=80)
+    plt.savefig(fig_saved, bbox_inches='tight')
+    plt.close(fig)

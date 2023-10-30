@@ -6,8 +6,7 @@ import multiprocessing as mp
 from tqdm import tqdm
 
 class runEstimator:
-    def __init__(self, *, root, value, param, estimator, n_process, **kwargs):
-        self.root = root
+    def __init__(self, *, value, param, estimator, n_process, **kwargs):
         self.value = value
         self.param = param
         self.estimator = estimator

@@ -76,7 +76,7 @@ if __name__ == "__main__":
                 for values_traj in process:
                     pass
         else:
-            runner = runEstimator(root=path_exp, estimator=args.estimator, n_process=n_process,
+            runner = runEstimator(estimator=args.estimator, n_process=n_process,
                                   value=args.value, param=args.param, game_func=game_func, game_args=game_args,
                                   num_player=args.n_valued, batch_size_avg=args.batch_size_avg,
                                   num_sample_avg=args.num_sample_avg, interval_track_avg=args.interval_track_avg,
