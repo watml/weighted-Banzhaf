@@ -2,7 +2,7 @@ import argparse
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-dataset", "--dataset-list", nargs='+', type=str, default="2dplanes")
+    parser.add_argument("-dataset", nargs='+', type=str, default="2dplanes")
     # "2dplanes", "bank-marketing", "bioresponse", "covertype", "cpu", "credit", "default", "diabetes", "fraud", "gas",
     # "har", "letter", "optdigits", "pendigits", "phoneme", "pol", "satimage", "segment", "spambase", "texture", "wind",
     # "MNIST", "FMNIST"
@@ -21,7 +21,7 @@ def get_args():
     # 0 to use the fine-tuned one
     parser.add_argument("-value", type=str, default="shapley", help="which semi-value to employ")
     # "beta_shapley" or "shapley" or "weighted_banzhaf"
-    parser.add_argument("-param", "--param-list", nargs='+', type=eval, default=None,
+    parser.add_argument("-param", nargs='+', type=eval, default=None,
                         help="the parameter that specifies a semi-value")
     # param in [0, 1] if value=="weighted_banzhaf"
     # param = (alpha, beta), where alpha, beta >= 1 and are integers, if value="beta_shapley"
@@ -39,9 +39,9 @@ def get_args():
                         help="the number of averaged utility evaluations to record while approximating")
     parser.add_argument("-dataset_seed",  type=int, default=2023, help="the randomness used to split datasets")
     parser.add_argument("-flip_seed", type=int, default=2023, help="the randomness used to flip labels")
-    parser.add_argument("-game_seed", "--game_seed-list", nargs='+', type=int, default=2023,
+    parser.add_argument("-game_seed", nargs='+', type=int, default=2023,
                         help="the randomness used by utility functions")
-    parser.add_argument("-estimator_seed", "--estimator_seed-list", nargs='+', type=int, default=2023,
+    parser.add_argument("-estimator_seed", nargs='+', type=int, default=2023,
                         help="the randomness used by approximation")
 
 
@@ -49,10 +49,8 @@ def get_args():
     parser.add_argument("-dir", type=str, default="tmp", help="directory to store results")
 
     args = vars(parser.parse_args())
-    args["dataset"] = args.pop("dataset_list")
-    args["param"] = args.pop("param_list")
-    args["game_seed"] = args.pop("game_seed_list")
-    args["estimator_seed"] = args.pop("estimator_seed_list")
+    if args["value"] == "shapley":
+        assert args["param"] is None
     return args
 
 
