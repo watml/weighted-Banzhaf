@@ -48,8 +48,8 @@ def extreme_case(param):
 
 if __name__ == "__main__":
     args_all = args_product([args_input])
-    fill_auto(args_all)
     generate_root(args_all, name_top, name_sub)
+    fill_auto(args_all)
     for args in args_all:
         path_exp = os.path.join(root, args.root)
         os.makedirs(path_exp, exist_ok=True)

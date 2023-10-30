@@ -17,16 +17,16 @@ def get_args():
     parser.add_argument("-arch", type=str, default="logistic",
                         help="the architecture of trainable models for defining utility functions")
     # "logistic" or "LeNet"
-    parser.add_argument("-lr", type=float, default=0, help="the learning rate used by utility functions")
-    # 0 to use the fine-tuned one
+    parser.add_argument("-lr", type=float, default=-1, help="the learning rate used by utility functions")
+    # -1 means to use the fine-tuned one
     parser.add_argument("-value", type=str, default="shapley", help="which semi-value to employ")
     # "beta_shapley" or "shapley" or "weighted_banzhaf"
     parser.add_argument("-param", nargs='+', type=eval, default=None,
                         help="the parameter that specifies a semi-value")
     # param in [0, 1] if value=="weighted_banzhaf"
     # param = (alpha, beta), where alpha, beta >= 1 and are integers, if value="beta_shapley"
-    # param could be anything if value="shapley"
-    # if value="weighted_banzhaf", param="auto" is to use the predicted paramters from the fitted Kronecker noises
+    # param could be anything if value="shapley", in the below param will be set to be None
+    # if value="weighted_banzhaf", param=-1 is to use the predicted paramters from the fitted Kronecker noises
     parser.add_argument("-estimator", type=str, default="permutation", help="the estimator use for approximating values")
     # "maximum_sample_reuse" if value="weighted_banzhaf"
     # "permutation" if value="shapley"
@@ -57,9 +57,9 @@ def get_args():
 def fill_auto(args_all):
     global lr_auto, param_robust
     for args in args_all:
-        if args["lr"] == 0:
+        if args["lr"] == -1:
             args["lr"] = lr_auto[args["n_valued"]][args["dataset"]]
-        if args["param"] == "auto":
+        if args["param"] == -1:
             assert args["value"] == "weighted_banzhaf"
             args["param"] = param_robust[args["dataset"]]
 
