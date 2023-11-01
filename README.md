@@ -65,7 +65,7 @@ Note that the final results have been included in args.py so that they will be a
 python main.py -dir authentic_noises -dataset iris phoneme -n_valued 10 -n_val 10 -flip_percent 0 -lr 1.0 -value weighted_banzhaf -estimator exact_value game_seed 0 1 2 3 4 5 6 7 8 9
 ` 
 
-1) After all the exact values are calculated, the reported figures can be obtained by running
+After all the exact values are calculated, the reported figures can be obtained by running
 
 `
 python plot_authentic_noises.py -dir authentic_noises
