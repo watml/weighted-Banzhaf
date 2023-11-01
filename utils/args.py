@@ -28,14 +28,15 @@ def get_args():
     # param could be anything if value="shapley", in the below param will be set to be None
     # if value="weighted_banzhaf", param=-1 is to use the predicted paramters from the fitted Kronecker noises
     parser.add_argument("-estimator", type=str, default="permutation", help="the estimator use for approximating values")
-    # "maximum_sample_reuse" if value="weighted_banzhaf"
-    # "permutation" if value="shapley"
-    # "sampling lift" or "weighted_sampling_lift" for any value
+    # "maximum_sample_reuse" requires value="weighted_banzhaf"
+    # "permutation" requires value="shapley"
+    # "sampling lift" or "weighted_sampling_lift" are for any value
     parser.add_argument("-num_sample_avg", type=int, default=100,
                         help="the number of averaged utility evaluations for approximation")
     parser.add_argument("-batch_size_avg", type=int, default=2,
                         help="the number of averaged utility evaluations each process will run at a time")
-    parser.add_argument("-interval_track_avg", type=int, default=20,
+    # The number of processes to run is -(-num_sample_avg // batch_size_avg)
+    parser.add_argument("-interval_track_avg", type=int, default=100,
                         help="the number of averaged utility evaluations to record while approximating")
     parser.add_argument("-dataset_seed",  type=int, default=2023, help="the randomness used to split datasets")
     parser.add_argument("-flip_seed", type=int, default=2023, help="the randomness used to flip labels")

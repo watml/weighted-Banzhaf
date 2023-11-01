@@ -17,7 +17,6 @@ from utils.funcs import *
 import argparse
 from dotmap import DotMap
 
-# python compare_estimators.py -dataset 2dplanes -n_process 40 -dir estimator -n_valued 16 -value weighted_banzhaf -param 0.8 -lr 1.0 -estimator_seed 0 1 2 3 4 5 -num_sample_avg 1500 -batch_size_avg 50 -interval_track_avg 30
 if __name__ == "__main__":
     os.makedirs("fig", exist_ok=True)
     args = DotMap(get_args())
