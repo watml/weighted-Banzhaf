@@ -25,7 +25,7 @@ def get_optimal_value(accs):
         _q = torch.distributions.multivariate_normal.MultivariateNormal(torch.zeros(n_valued+1), cov_appr)
         return torch.distributions.kl.kl_divergence(_p, _q)
 
-    traj_saved = os.path.join(root, f"{dataset};traj_opt.npz")
+    traj_saved = os.path.join(root, f"traj_opt;dataset={dataset}.npz")
     if not os.path.exists(traj_saved):
         msg = "epoch {} | loss {:<.8f}, sigma11 {:<.5f}, sigma12 {:<.5f}, sigma22 {:<.5f}, weight {}"
         for i in range(num_seed_ord):
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     n_valued = 10
     n_val = 10
     lr = 1.0
-    root = os.path.join("exp", "approximate_robust_value")
+    root = os.path.join("exp", "fit_Kronecker_noises")
     os.makedirs(root, exist_ok=True)
 
     list_seed_ord = np.arange(num_seed_ord)
@@ -112,7 +112,7 @@ if __name__ == "__main__":
         print(f"working on dataset {dataset}...")
         print("estimating the emprical covariance matrix...")
 
-        var_saved = os.path.join(root, f"{dataset};covariance.npz")
+        var_saved = os.path.join(root, f"covariance;dataset={dataset}.npz")
         if not os.path.exists(var_saved):
             (X_valued, y_valued), (X_val, y_val), num_class = load_dataset(dataset=dataset, n_valued=n_valued,
                                                                            n_val=n_val)

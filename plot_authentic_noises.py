@@ -28,13 +28,13 @@ def binplot(x, y, _type):
     ylabels = dict(ranking="Spearman's rank correlation coefficient", variance="variance")
     plt.ylabel(ylabels[_type], fontsize=80)
 
-    plt.savefig(os.path.join("fig", f"authentic;{_type};dataset={dataset}"), bbox_inches='tight')
+    plt.savefig(os.path.join("fig", f"authentic_noises;{_type};dataset={dataset}"), bbox_inches='tight')
     plt.close(fig)
 
 if __name__ == "__main__":
     os.makedirs("fig", exist_ok=True)
     parser = argparse.ArgumentParser()
-    parser.add_argument("-dir", type=str, default="authentic")
+    parser.add_argument("-dir", type=str, default="authentic_noises")
     args_input = parser.parse_args()
 
     path_exp = os.path.join("exp", args_input.dir)

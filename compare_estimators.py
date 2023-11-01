@@ -107,7 +107,7 @@ if __name__ == "__main__":
     x = np.arange(interval_track_avg, num_sample_avg+1, interval_track_avg)
     ys = [diff_SL, diff_WSL, diff_MSR]
     labels = ["sampling lift", "weighted sampling lift", "maximum sample reuse"]
-    fig_saved = os.path.join("fig", f"{dataset};sampling.png")
+    fig_saved = os.path.join("fig", f"compare_estimators;dataset={dataset}.png")
     plot_curves(x, ys, fig_saved, labels=labels, x_label="number of utility evaluations per datum",
                 y_label="relative difference")
 
