@@ -9,9 +9,9 @@ All user-specified arguments are contained in args.py. In our paper, using n dif
 python main.py -n_process 50 -dir 200data -value shapley -estimator permutation -dataset 2dplanes gas -game_seed 0 1 2 3 4 5 6 7 8 9 -n_valued 200 -n_val 200 -flip_percent 0.1 -num_sample_avg 1000 -batch_size_avg 20
 `
 
-Specifically, n_process is the number of cpus used for parallel computing (we have set the number of threads for each process to be 1), the default of which is 1, and thus one has to make sure that the number of available cpus is at least n_process; the number of processes that will be run in total is -(-num_sample_avg // batch_size_avg); in other words, n_process should be no more than -(-num_sample_avg // batch_size_avg); 
-the total number of utility evaluations is the product of num_sample_avg and n_valued;
-dir is to specify a directory to store results, which will be created in the directory exp; game_seed refers to the random seed used to decide the randomness contained in utility functions. n_valued refers to the number of data being valuated, while n_val is the number of data used for reported the performance of trained models.
+Specifically, n_process is the number of cpus used for parallel computing (we have set the number of threads for each process to be 1), the default of which is 1, and thus one has to make sure that the number of available cpus is at least n_process; the number of processes that will be run in total is -(-num_sample_avg // batch_size_avg) if estimator != "exact_value"; in other words, n_process should be no more than -(-num_sample_avg // batch_size_avg); 
+the total number of utility evaluations is the product of num_sample_avg and n_valued if estimator != "exact_value";
+dir is to specify a directory (which will be created in the directory exp) that will store results; game_seed refers to the random seed used to decide the randomness contained in utility functions. n_valued is the number of data being valuated, while n_val is the number of data used for reported the performance of trained models.
 
 To approximate weighted Banzhaf values, the command is, e.g.,
 
@@ -22,7 +22,7 @@ python main.py -n_process 50 -dir 200data -value weighted_banzhaf -param 0.1 0.2
 It will estimate the corresponding 0.1-, 0.2- and 0.3-weighted Banzhaf values. For Beta Shapley values, it is 
 
 `
-python main.py -n_process 50 -dir 200data -value beta_shapley -param (16,1) (4,1) (1,4) (1,16) -estimator maximum_sample_reuse -dataset 2dplanes gas -game_seed 0 1 2 3 4 5 6 7 8 9 -n_valued 200 -n_val 200 -flip_percent 0.1 -num_sample_avg 1000 -batch_size_avg 20
+python main.py -n_process 50 -dir 200data -value beta_shapley -param (16,1) (4,1) (1,4) (1,16) -estimator weighted_sampling_lift -dataset 2dplanes gas -game_seed 0 1 2 3 4 5 6 7 8 9 -n_valued 200 -n_val 200 -flip_percent 0.1 -num_sample_avg 1000 -batch_size_avg 20
 `
 
 After all the estimated values are generated, to report the results of ranking consistency and noisy label detection, just run
@@ -44,13 +44,13 @@ python compare_estimators.py -dataset 2dplanes -dir compare_estimators -n_valued
 Note that one can further specify n_process for parallel computing, the maximum of which will not be idle in this case is 30.
 
 ## Synthetic Noises
-The following command will produce the one reported in the paper
+The following command will produce the first column of Figure 3 in the paper
 
 `
 python plot_synthetic_noises.py -dataset spambase
 `
 
-To speed up, n_process can be specified whose maximum is 21 in this case. Note the calculation for the number of processes being run is different if estimator=="exact_value".
+To speed up, n_process can be specified (the maximum is 21 in this case). Note the calculation for the number of processes that will be run is different if estimator=="exact_value".
 
 ## Authentic Noises
 To generate the parameters for the predicted robust weighted Bazhaf values, one can run
