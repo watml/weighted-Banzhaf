@@ -32,7 +32,7 @@ python plot_ranking_and_noisy.py -dir 200data
 `
 
 The produced figures are all saved in the directory fig, which will be created automatically.
-To replicate all the reported results in the experiments of ranking consistency as well as noisy label detection, just plug in the choices of arguments reported in our paper. 
+To replicate all the reported results in the experiments of ranking consistency as well as noisy label detection, just plug in the choices of arguments reported in our paper. Specifically, num_sample_avg = 200 if n_valued = 2000, and it is 400 if n_valued = 1000.
 
 ## Compare Estimators
 To have Figure 2 reported in the paper, one can run
