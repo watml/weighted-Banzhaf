@@ -9,7 +9,7 @@ All user-specified arguments are contained in args.py. In our paper, using n dif
 python main.py -n_process 50 -dir 200data -value shapley -estimator permutation -dataset 2dplanes gas -game_seed 0 1 2 3 4 5 6 7 8 9 -n_valued 200 -n_val 200 -flip_percent 0.1 -num_sample_avg 1000 -batch_size_avg 20
 `
 
-Specifically, n_process is the number of cpus used for parallel computing (we have set the number of threads for each process to be 1), the default of which is 1, and thus one has to make sure that the number of available cpus is at least n_process; the number of processes required is -(-num_sample_avg // batch_size_avg); in other words, n_process should be no more than -(-num_sample_avg // batch_size_avg); 
+Specifically, n_process is the number of cpus used for parallel computing (we have set the number of threads for each process to be 1), the default of which is 1, and thus one has to make sure that the number of available cpus is at least n_process; the number of processes that will be run in total is -(-num_sample_avg // batch_size_avg); in other words, n_process should be no more than -(-num_sample_avg // batch_size_avg); 
 the total number of utility evaluations is the product of num_sample_avg and n_valued;
 dir is to specify a directory to store results, which will be created in the directory exp; game_seed refers to the random seed used to decide the randomness contained in utility functions. n_valued refers to the number of data being valuated, while n_val is the number of data used for reported the performance of trained models.
 
