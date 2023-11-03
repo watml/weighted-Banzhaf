@@ -1,6 +1,13 @@
 # Robust Data Valuation with Weighted Banzhaf Values
 
-This repository is to provide an implementation to replicate all the results reported in the paper Robust Data Valuation with Weighted Banzhaf Values accepted in NeurIPS 2023.
+This repository is to provide an implementation to replicate all the results reported in the paper *Robust Data Valuation with Weighted Banzhaf Values* accepted to NeurIPS 2023: 
+> @inproceedings{LiYu23,
+>   title       = {Robust Data Valuation with Weighted {B}anzhaf Values},
+>   author      = {W. Li and Y. Yu},
+>   booktitle   = {Advances in Neural Information Processing Systems {(NeurIPS)}},  
+>   year        = {2023},
+>   url         = {https://openreview.net/forum?id=u359tNBpxF},
+> }
 
 ## Quick Start
 All user-specified arguments are contained in args.py. In our paper, using n different random seeds means the set of random seeds we used is {0, 1, 2, ..., n-1}. To replicate the additional results on size-200 datasets reported in the Appendix, take the Shapley value on the two datasets 2dplanes and gas for example, one can run the following command,
