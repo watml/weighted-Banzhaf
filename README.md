@@ -2,11 +2,17 @@
 
 This repository is to provide an implementation to replicate all the results reported in the paper *Robust Data Valuation with Weighted Banzhaf Values* accepted to NeurIPS 2023: 
 > @inproceedings{LiYu23,
+> 
 >   title       = {Robust Data Valuation with Weighted {B}anzhaf Values},
+> 
 >   author      = {W. Li and Y. Yu},
->   booktitle   = {Advances in Neural Information Processing Systems {(NeurIPS)}},  
+> 
+>   booktitle   = {Advances in Neural Information Processing Systems {(NeurIPS)}},
+> 
 >   year        = {2023},
+> 
 >   url         = {https://openreview.net/forum?id=u359tNBpxF},
+> 
 > }
 
 ## Quick Start
