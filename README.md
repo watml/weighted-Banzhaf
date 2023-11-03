@@ -11,7 +11,7 @@ This repository is to provide an implementation to replicate all the results rep
     }
 
 ## Quick Start
-All user-specified arguments are contained in args.py. In our paper, using n different random seeds means the set of random seeds we used is {0, 1, 2, ..., n-1}. To replicate the additional results on size-200 datasets reported in the Appendix, take the Shapley value on the two datasets 2dplanes and gas for example, one can run the following command,
+All user-specified arguments are contained in args.py. In our paper, using n different random seeds means the set of random seeds we used is {0, 1, 2, ..., n-1}. To replicate the additional results on size-200 datasets reported in the Appendix, take the Shapley value on the two datasets 2dplanes and gas for example, one can run the following command:
 
 `
 python main.py -n_process 50 -dir 200data -value shapley -estimator permutation -dataset 2dplanes gas -game_seed 0 1 2 3 4 5 6 7 8 9 -n_valued 200 -n_val 200 -flip_percent 0.1 -num_sample_avg 1000 -batch_size_avg 20
