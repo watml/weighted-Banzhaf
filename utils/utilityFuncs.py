@@ -15,7 +15,7 @@ class gameTraining:
         self.num_player = len(y_valued)
 
         # initialize everything related to each specified game_seed
-        self._set_game_seed = self._game_seed = self.X_train = self.y_train = self.perm = None
+        self._game_seed = self.X_train = self.y_train = self.perm = None
         self.game_seed = game_seed
 
         # load model and optimizer
