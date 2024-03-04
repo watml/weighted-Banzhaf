@@ -322,7 +322,6 @@ class maximum_sample_reuse(estimatorBasic):
         self.pos_buffer = 0
 
     def _sampling(self):
-        i = 0
         for i in range(self.batch_size, self.num_sample, self.batch_size):
             collect = np.random.binomial(1, self.param, size=(self.batch_size, self.num_player)).astype(bool)
             yield collect
