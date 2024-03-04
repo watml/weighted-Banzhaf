@@ -66,7 +66,8 @@ class exact_value(estimatorBasic):
             if count == self.batch_size:
                 yield samples.copy()
                 count = 0
-        yield samples[:count]
+        if count:
+            yield samples[:count]
 
     def run(self, samples):
         weights = np.empty(self.num_player, dtype=np.float64)
@@ -145,7 +146,8 @@ class sampling_lift(estimatorBasic):
             if count == self.batch_size:
                 yield samples.copy()
                 count = 0
-        yield samples[:count]
+        if count:
+            yield samples[:count]
 
     def run(self, samples):
         game = self.game_func(**self.game_args)
@@ -207,7 +209,8 @@ class weighted_sampling_lift(sampling_lift):
             if count == self.batch_size:
                 yield samples.copy()
                 count = 0
-        yield samples[:count]
+        if count:
+            yield samples[:count]
 
     def run(self, samples):
         if self.value == "weighted_banzhaf":
@@ -282,7 +285,8 @@ class permutation(sampling_lift):
             if count == self.batch_size:
                 yield samples.copy()
                 count = 0
-        yield samples[:count]
+        if count:
+            yield samples[:count]
 
     def run(self, samples):
         game = self.game_func(**self.game_args)
