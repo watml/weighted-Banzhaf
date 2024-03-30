@@ -2,52 +2,52 @@ import argparse
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-dataset", nargs='+', type=str, default="2dplanes")
+    parser.add_argument("--dataset", nargs='+', type=str, default="2dplanes")
     # "2dplanes", "bank-marketing", "bioresponse", "covertype", "cpu", "credit", "default", "diabetes", "fraud", "gas",
     # "har", "letter", "optdigits", "pendigits", "phoneme", "pol", "satimage", "segment", "spambase", "texture", "wind",
     # "MNIST", "FMNIST"
-    parser.add_argument("-n_valued", type=int, default=200,
+    parser.add_argument("--n_valued", type=int, default=200,
                         help="the number of data being valuated, data that constitutes D_{tr}")
-    parser.add_argument("-n_val", type=int, default=200,
+    parser.add_argument("--n_val", type=int, default=200,
                         help="the number of data used for reporting the performance of trained models")
-    parser.add_argument("-flip_percent", type=float, default=0.2, help="the percent of data, i.e., D_{tr}, to be flipped")
-    parser.add_argument("-game_func", type=str, default="gameTraining",
+    parser.add_argument("--flip_percent", type=float, default=0.2, help="the percent of data, i.e., D_{tr}, to be flipped")
+    parser.add_argument("--game_func", type=str, default="gameTraining",
                         help="the class that defines a type of utility function")
     # "gameTraining" or "gamePerturbed"
-    parser.add_argument("-arch", type=str, default="logistic",
+    parser.add_argument("--arch", type=str, default="logistic",
                         help="the architecture of trainable models for defining utility functions")
     # "logistic" or "LeNet"
-    parser.add_argument("-lr", type=float, default=-1, help="the learning rate used by utility functions")
+    parser.add_argument("--lr", type=float, default=-1, help="the learning rate used by utility functions")
     # -1 means to use the fine-tuned one
-    parser.add_argument("-value", type=str, default="shapley", help="which semi-value to employ")
+    parser.add_argument("--value", type=str, default="shapley", help="which semi-value to employ")
     # "beta_shapley" or "shapley" or "weighted_banzhaf"
-    parser.add_argument("-param", nargs='+', type=eval, default=None,
+    parser.add_argument("--param", nargs='+', type=eval, default=None,
                         help="the parameter that specifies a semi-value")
     # param in [0, 1] if value=="weighted_banzhaf"
     # param = (alpha, beta), where alpha, beta >= 1 and are integers, if value="beta_shapley"
     # param could be anything if value="shapley", in the below param will be set to be None
     # if value="weighted_banzhaf", param=-1 is to use the predicted paramters from the fitted Kronecker noises
-    parser.add_argument("-estimator", type=str, default="permutation", help="the estimator use for approximating values")
+    parser.add_argument("--estimator", type=str, default="permutation", help="the estimator use for approximating values")
     # "maximum_sample_reuse" requires value="weighted_banzhaf"
     # "permutation" requires value="shapley"
     # "sampling lift" or "weighted_sampling_lift" are for any value
-    parser.add_argument("-num_sample_avg", type=int, default=100,
+    parser.add_argument("--num_sample_avg", type=int, default=100,
                         help="the number of averaged utility evaluations for approximation")
-    parser.add_argument("-batch_size_avg", type=int, default=2,
+    parser.add_argument("--batch_size_avg", type=int, default=2,
                         help="the number of averaged utility evaluations each process will run at a time")
     # The number of processes to run is -(-num_sample_avg // batch_size_avg)
-    parser.add_argument("-interval_track_avg", type=int, default=100,
+    parser.add_argument("--interval_track_avg", type=int, default=100,
                         help="the number of averaged utility evaluations to record while approximating")
-    parser.add_argument("-dataset_seed",  type=int, default=2023, help="the randomness used to split datasets")
-    parser.add_argument("-flip_seed", type=int, default=2023, help="the randomness used to flip labels")
-    parser.add_argument("-game_seed", nargs='+', type=int, default=2023,
+    parser.add_argument("--dataset_seed",  type=int, default=2023, help="the randomness used to split datasets")
+    parser.add_argument("--flip_seed", type=int, default=2023, help="the randomness used to flip labels")
+    parser.add_argument("--game_seed", nargs='+', type=int, default=2023,
                         help="the randomness used by utility functions")
-    parser.add_argument("-estimator_seed", nargs='+', type=int, default=2023,
+    parser.add_argument("--estimator_seed", nargs='+', type=int, default=2023,
                         help="the randomness used by approximation")
 
 
-    parser.add_argument("-n_process", type=int, default=1, help="the number of processes for parallel computing")
-    parser.add_argument("-dir", type=str, default="tmp", help="directory to store results")
+    parser.add_argument("--n_process", type=int, default=1, help="the number of processes for parallel computing")
+    parser.add_argument("--dir", type=str, default="tmp", help="directory to store results")
 
     args = vars(parser.parse_args())
     if args["value"] == "shapley":

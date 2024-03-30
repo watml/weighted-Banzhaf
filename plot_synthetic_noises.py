@@ -34,8 +34,8 @@ def get_spearmanr(vec, vecs):
 if __name__ == "__main__":
     os.makedirs("fig", exist_ok=True)
     parser = argparse.ArgumentParser()
-    parser.add_argument("-dataset", type=str, default="spambase")
-    parser.add_argument("-n_process", type=int, default=1)
+    parser.add_argument("--dataset", type=str, default="spambase")
+    parser.add_argument("--n_process", type=int, default=1)
     args = parser.parse_args()
     dataset = args.dataset
     n_process = args.n_process

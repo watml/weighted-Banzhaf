@@ -34,7 +34,7 @@ def binplot(x, y, _type):
 if __name__ == "__main__":
     os.makedirs("fig", exist_ok=True)
     parser = argparse.ArgumentParser()
-    parser.add_argument("-dir", type=str, default="authentic_noises")
+    parser.add_argument("--dir", type=str, default="authentic_noises")
     args_input = parser.parse_args()
 
     path_exp = os.path.join("exp", args_input.dir)

@@ -62,7 +62,7 @@ def binplot(collect, _type):
 if __name__ == "__main__":
     os.makedirs("fig", exist_ok=True)
     parser = argparse.ArgumentParser()
-    parser.add_argument("-dir", type=str, default="tmp")
+    parser.add_argument("--dir", type=str, default="tmp")
     args_input = parser.parse_args()
     path_exp = os.path.join("exp", args_input.dir)
 
